@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sayı Tahmin Oyunu</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        input {
+            width: 200px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #result, #hint {
+            margin-top: 20px;
+        }
+        #resetButton {
+            background: #f44336;
+        }
+        #resetButton:hover {
+            background: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sayı Tahmin Oyunu</h1>
+        <p>0 ile 100 arasında bir sayı tuttum. Bakalım tahmin edebilecek misiniz?</p>
+        <input type="text" id="guess" placeholder="Tahmini Giriniz">
+        <button onclick="checkGuess()">Tahmin Et</button>
+        <div id="result"></div>
+        <div id="hint"></div>
+        <button onclick="resetGame()" style="display: none;" id="resetButton">Yeniden Başla</button>
+    </div>
+
+    <script>
+        const apiUrl = 'http://localhost:3000';
+
+        async function checkGuess() {
+            const guess = parseInt(document.getElementById('guess').value);
+            const response = await fetch(`${apiUrl}/guess`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ guess })
+            });
+            const result = await response.json();
+            document.getElementById('result').innerHTML = result.message;
+            document.getElementById('hint').innerHTML = result.success ? '' : `Kalan tahmin hakkınız: ${result.attemptsLeft}`;
+
+            if (result.reset) {
+                document.getElementById('resetButton').style.display = 'block';
+            }
+        }
+
+        async function resetGame() {
+            const response = await fetch(`${apiUrl}/reset`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            document.getElementById('result').innerHTML = result.message;
+            document.getElementById('hint').innerHTML = '';
+            document.getElementById('guess').value = '';
+            document.getElementById('resetButton').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
